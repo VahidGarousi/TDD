@@ -16,12 +16,14 @@ public class RaceResultsService {
         clients.add(client);
     }
 
-    public void send(Category category, Message message) {
+    public void send(Category category, Message... messages) {
         for (Client client : clients) {
             if (client.getCategories().contains(category)) {
                 String date = String.valueOf(System.currentTimeMillis());
-                logger.log(date,message.getMessage());
-                client.receive(message);
+                for (Message message : messages) {
+                    logger.log(date, message.getMessage());
+                    client.receive(message);
+                }
             }
         }
     }

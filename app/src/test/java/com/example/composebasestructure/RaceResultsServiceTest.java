@@ -15,7 +15,8 @@ import java.util.Collections;
 public class RaceResultsServiceTest {
     private final Logger logger = mock(Logger.class);
     private final RaceResultsService raceResults = new RaceResultsService(logger);
-    private final Message message = mock(Message.class);
+    private final Message messageA = mock(Message.class,"MessageA");
+    private final Message messageB = mock(Message.class,"MessageB");
     private final Category categoryA = mock(Category.class, "CategoryA");
     private final Category categoryB = mock(Category.class, "CategoryB");
     private final Client clientA = mock(Client.class, "ClientA");
@@ -24,9 +25,9 @@ public class RaceResultsServiceTest {
     // zero subscribers
     @Test
     public void notSubscribedClientShouldNotReceiveMessage() {
-        raceResults.send(categoryA, message);
-        verify(clientA, never()).receive(message);
-        verify(clientB, never()).receive(message);
+        raceResults.send(categoryA, messageA);
+        verify(clientA, never()).receive(messageA);
+        verify(clientB, never()).receive(messageA);
     }
 
     // one subscribers
@@ -35,8 +36,8 @@ public class RaceResultsServiceTest {
         clientA.subscribeToCategory(categoryA);
         when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
         raceResults.addSubscriber(clientA);
-        raceResults.send(categoryA, message);
-        verify(clientA).receive(message);
+        raceResults.send(categoryA, messageA);
+        verify(clientA).receive(messageA);
     }
 
     // two subscribers
@@ -48,9 +49,9 @@ public class RaceResultsServiceTest {
         when(clientB.getCategories()).thenReturn(Collections.singletonList(categoryA));
         raceResults.addSubscriber(clientA);
         raceResults.addSubscriber(clientB);
-        raceResults.send(categoryA, message);
-        verify(clientA).receive(message);
-        verify(clientB).receive(message);
+        raceResults.send(categoryA, messageA);
+        verify(clientA).receive(messageA);
+        verify(clientB).receive(messageA);
     }
 
 
@@ -60,8 +61,8 @@ public class RaceResultsServiceTest {
         when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
         raceResults.addSubscriber(clientA);
         raceResults.addSubscriber(clientA);
-        raceResults.send(categoryA, message);
-        verify(clientA).receive(message);
+        raceResults.send(categoryA, messageA);
+        verify(clientA).receive(messageA);
     }
 
     @Test
@@ -69,8 +70,8 @@ public class RaceResultsServiceTest {
         raceResults.addSubscriber(clientA);
         raceResults.removeSubscriber(clientA);
 
-        raceResults.send(categoryA, message);
-        verify(clientA, never()).receive(message);
+        raceResults.send(categoryA, messageA);
+        verify(clientA, never()).receive(messageA);
     }
 
 
@@ -81,10 +82,10 @@ public class RaceResultsServiceTest {
         raceResults.addSubscriber(clientB);
 
         when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
-        raceResults.send(categoryA, message);
+        raceResults.send(categoryA, messageA);
 
-        verify(clientB, never()).receive(message);
-        verify(clientA).receive(message);
+        verify(clientB, never()).receive(messageA);
+        verify(clientA).receive(messageA);
     }
 
     @Test
@@ -92,9 +93,9 @@ public class RaceResultsServiceTest {
         clientA.subscribeToCategory(categoryA); // spy
         raceResults.addSubscriber(clientA);
         when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
-        raceResults.send(categoryA, message);
-        raceResults.send(categoryB, message);
-        verify(clientA, atLeastOnce()).receive(message);
+        raceResults.send(categoryA, messageA);
+        raceResults.send(categoryB, messageA);
+        verify(clientA, atLeastOnce()).receive(messageA);
     }
 
     @Test
@@ -105,7 +106,23 @@ public class RaceResultsServiceTest {
         when(clientB.getCategories()).thenReturn(Collections.singletonList(categoryA));
         raceResults.addSubscriber(clientA);
         raceResults.addSubscriber(clientB);
-        raceResults.send(categoryA, message);
+        raceResults.send(categoryA, messageA);
         verify(logger,times(2)).log(any(), any());
+    }
+
+    @Test
+    public void shouldSendMultipleMessage() {
+        clientA.subscribeToCategory(categoryA);
+        clientB.subscribeToCategory(categoryA);
+        when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
+        when(clientB.getCategories()).thenReturn(Collections.singletonList(categoryA));
+        raceResults.addSubscriber(clientA);
+        raceResults.addSubscriber(clientB);
+        raceResults.send(categoryA, messageA,messageB);
+        verify(clientA).receive(messageA);
+        verify(clientA).receive(messageB);
+
+        verify(clientB).receive(messageA);
+        verify(clientB).receive(messageB);
     }
 }
