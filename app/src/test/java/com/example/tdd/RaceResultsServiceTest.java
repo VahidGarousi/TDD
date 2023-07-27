@@ -1,4 +1,4 @@
-package com.example.composebasestructure;
+package com.example.tdd;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
