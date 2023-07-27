@@ -125,4 +125,9 @@ public class RaceResultsServiceTest {
         verify(clientB).receive(messageA);
         verify(clientB).receive(messageB);
     }
+
+    @Test(expected =  IllegalStateException.class)
+    public void throwExceptionWhenClientWhichIsNotSubscribedTriesToUnsubscribe() {
+        raceResults.removeSubscriber(clientA);
+    }
 }

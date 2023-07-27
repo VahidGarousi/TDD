@@ -29,6 +29,8 @@ public class RaceResultsService {
     }
 
     public void removeSubscriber(Client client) {
-        clients.remove(client);
+        if (clients.contains(client))
+            clients.remove(client);
+        else throw new IllegalStateException("Are you sure that " + client + " was already subscribed?");
     }
 }
