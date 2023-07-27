@@ -1,8 +1,10 @@
 package com.example.composebasestructure;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,10 +13,11 @@ import org.junit.Test;
 import java.util.Collections;
 
 public class RaceResultsServiceTest {
-    private final RaceResultsService raceResults = new RaceResultsService();
+    private final Logger logger = mock(Logger.class);
+    private final RaceResultsService raceResults = new RaceResultsService(logger);
     private final Message message = mock(Message.class);
-    private final Category categoryA = mock(Category.class,"CategoryA");
-    private final Category categoryB = mock(Category.class,"CategoryB");
+    private final Category categoryA = mock(Category.class, "CategoryA");
+    private final Category categoryB = mock(Category.class, "CategoryB");
     private final Client clientA = mock(Client.class, "ClientA");
     private final Client clientB = mock(Client.class, "ClientB");
 
@@ -91,7 +94,18 @@ public class RaceResultsServiceTest {
         when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
         raceResults.send(categoryA, message);
         raceResults.send(categoryB, message);
-        verify(clientA,atLeastOnce()).receive(message);
+        verify(clientA, atLeastOnce()).receive(message);
     }
 
+    @Test
+    public void whenEachMessageSendThenLoggerShouldLogThat() {
+        clientA.subscribeToCategory(categoryA);
+        clientB.subscribeToCategory(categoryA);
+        when(clientA.getCategories()).thenReturn(Collections.singletonList(categoryA));
+        when(clientB.getCategories()).thenReturn(Collections.singletonList(categoryA));
+        raceResults.addSubscriber(clientA);
+        raceResults.addSubscriber(clientB);
+        raceResults.send(categoryA, message);
+        verify(logger,times(2)).log(any(), any());
+    }
 }
